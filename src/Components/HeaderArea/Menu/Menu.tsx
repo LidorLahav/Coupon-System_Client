@@ -2,20 +2,15 @@ import "./Menu.css";
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem'; 
-import CategoryIcon from '@material-ui/icons/Category';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuRoundedIcon from '@material-ui/icons/MenuRounded';
 import { NavLink } from "react-router-dom";
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles({
   root: {
-    // background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
-    // border: 0,
-    // borderRadius: 3,
-    // boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+    textTransform: 'capitalize',
     color: 'white',
-    // height: 48,
-    // padding: '0 30px',
   },
 });
 
@@ -34,8 +29,8 @@ function SimpleMenu() {
 
   return (
     <div>
-      <Button className={classes.root} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}><CategoryIcon/>
-        Categories
+      <Button className={classes.root} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}><MenuRoundedIcon />
+        &nbsp;Categories
       </Button>
       <Menu
         id="simple-menu"
@@ -45,6 +40,9 @@ function SimpleMenu() {
         onClose={handleClose}
       >
         <nav>
+          <NavLink to="/coupons/All" exact>
+            <MenuItem onClick={handleClose}>All</MenuItem>
+          </NavLink>
           <NavLink to="/coupons/Electricity" exact>
             <MenuItem onClick={handleClose}>Electricity</MenuItem>
           </NavLink>
@@ -62,6 +60,9 @@ function SimpleMenu() {
           </NavLink>
           <NavLink to="/coupons/Furniture" exact>
             <MenuItem onClick={handleClose}>Furniture</MenuItem>
+          </NavLink>
+          <NavLink to="/coupons/Sport" exact>
+            <MenuItem onClick={handleClose}>Sport</MenuItem>
           </NavLink>
         </nav>
       </Menu>

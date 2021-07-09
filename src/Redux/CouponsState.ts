@@ -1,7 +1,5 @@
-
-//handing product app state
-
 import CouponModel from "../Models/CouponModel";
+import CustomerModel from "../Models/CustomerModel";
 
 export interface CouponCategories {
     All: CouponModel[],
@@ -10,124 +8,199 @@ export interface CouponCategories {
     Restaurant: CouponModel[],
     Vacation: CouponModel[],
     Attractions: CouponModel[],
-    Furniture: CouponModel[]
+    Furniture: CouponModel[],
+    Sport: CouponModel[]
 }
 
-//product app state- הבמידע ברמת האפליקציה הקשור למוצרים -אלו בעצם כל המוצרים
+export interface CouponSet {
+    coupons: CouponModel[],
+    numOfPages: number,
+    totalElements: number
+}
+
+interface CouponPageCategories {
+    All: CouponSet,
+    Electricity: CouponSet,
+    Spa: CouponSet,
+    Restaurant: CouponSet,
+    Vacation: CouponSet,
+    Attractions: CouponSet,
+    Furniture: CouponSet,
+    Sport: CouponSet
+}
+
 export class CouponsState {
-    public coupons: CouponCategories = {
-        All: [],
-        Electricity: [],
-        Spa: [],
-        Restaurant: [],
-        Vacation: [],
-        Attractions: [],
-        Furniture: []
-    }; //we are going to create initial object
+    public category: CouponPageCategories = {
+        All: {
+            coupons: [],
+            numOfPages: 0,
+            totalElements: 0
+        },
+        Electricity: {
+            coupons: [],
+            numOfPages: 0,
+            totalElements: 0
+        },
+        Spa: {
+            coupons: [],
+            numOfPages: 0,
+            totalElements: 0
+        },
+        Restaurant: {
+            coupons: [],
+            numOfPages: 0,
+            totalElements: 0
+        },
+        Vacation: {
+            coupons: [],
+            numOfPages: 0,
+            totalElements: 0
+        },
+        Attractions: {
+            coupons: [],
+            numOfPages: 0,
+            totalElements: 0
+        },
+        Furniture: {
+            coupons: [],
+            numOfPages: 0,
+            totalElements: 0
+        },
+        Sport: {
+            coupons: [],
+            numOfPages: 0,
+            totalElements: 0
+        }
+    };
 }
-//----------------------------------------------------------------------------------
-//product action types:-אלו פעולות ניתן לבצע ברמת האפליקציה
-export enum CouponsActionType{
-    CouponsDownloaded="CouponsDownloaded",
-    CouponAdded="CouponAdded",
-    CouponUpdated="CouponUpdated",
-    CouponDeleted="CouponDeleted"
+
+export enum CouponsActionType {
+    CouponsDownloaded = "CouponsDownloaded",
+    CouponAdded = "CouponAdded",
+    CouponUpdated = "CouponUpdated",
+    CouponDeleted = "CouponDeleted",
+    CompanyCouponsDeleted = "CompanyCouponsDeleted",
+    CouponPurchased = "CouponPurchased"
 }
-//----------------------------------------------------------------------------------
-//product action - האובייקט המכיל את המידע עבור הפעולה שאנו מבצעים על המידע ברמת האפליקציה 
-export interface CouponsAction{
+
+export interface CouponsAction {
     type: CouponsActionType;
-    payload?: any;//payload?any, if the payload can be empty
+    payload?: any;
     category?: string;
-}
-//----------------------------------------------------------------------------------
-//products action creators-פונקציות המקבלות את ה- payload
-//ומחזירות אובייקט action 
-//מתאים עבור כל פעולה 
-
-export function couponsDownloadedAction(coupons: CouponModel[], category: string): CouponsAction {
-    return { type: CouponsActionType.CouponsDownloaded, payload: coupons, category: category };
+    numOfPages?: number;
+    totalElements?: number;
+    customer?: CustomerModel;
+    companyId?: number;
 }
 
-export function couponAddedAction(coupon: CouponModel): CouponsAction {
-    return { type: CouponsActionType.CouponAdded, payload: coupon };
+export function couponsDownloadedAction(coupons: CouponModel[], category: string, numOfPages: number, totalElements: number): CouponsAction {
+    return { type: CouponsActionType.CouponsDownloaded, payload: coupons, category: category, numOfPages: numOfPages, totalElements: totalElements };
 }
 
-export function couponUpdatedAction(coupon: CouponModel): CouponsAction {
-    return { type: CouponsActionType.CouponUpdated, payload: coupon };
+export function couponAddedAction(coupon: CouponModel, category: string): CouponsAction {
+    return { type: CouponsActionType.CouponAdded, payload: coupon, category: category };
 }
-export function couponDeletedAction(coupon: CouponModel): CouponsAction {
-    return { type: CouponsActionType.CouponDeleted, payload: coupon };
+
+export function couponUpdatedAction(coupon: CouponModel, category: string): CouponsAction {
+    return { type: CouponsActionType.CouponUpdated, payload: coupon, category: category };
 }
-//----------------------------------------------------------------------------------------
-//products reducer - פונקציה המבצעת את הפעולה בפועל 
-export function couponsReducer (currentState: CouponsState = new CouponsState(), action:CouponsAction): CouponsState {
-    //****functional programming**** TODO: check if can be replaced with concat
-    const newState = {...currentState}; //spread operator - שכפול אובייקט
-    switch(action.type){
+export function couponDeletedAction(coupon: CouponModel, category: string): CouponsAction {
+    return { type: CouponsActionType.CouponDeleted, payload: coupon, category: category };
+}
+export function companyCouponsDeletedAction(companyId: number, category: string): CouponsAction {
+    return { type: CouponsActionType.CompanyCouponsDeleted, payload: companyId, category: category };
+}
+export function couponPurchasedAction(coupon: CouponModel, customer: CustomerModel, category: string): CouponsAction {
+    return { type: CouponsActionType.CouponPurchased, payload: coupon, customer: customer, category: category };
+}
+
+export function couponsReducer(currentState: CouponsState = new CouponsState(), action: CouponsAction): CouponsState {
+    const newState = { ...currentState };
+    switch (action.type) {
         case CouponsActionType.CouponAdded:
-            // const categoryA = (action.payload as CouponModel).category
-            // switchCategory(categoryA, newState).push(action.payload);//TODO: check if need to replace with concat
-            // newState.coupons.All.push(action.payload);
+            const categoryA = action.category;
+            switchCategory(newState, categoryA, (source: CouponSet, couponAdded: CouponModel[]) => {
+                source.coupons.push(couponAdded[0]);
+                source.totalElements++;
+                return source;
+            }, [action.payload]);
             break;
         case CouponsActionType.CouponsDownloaded:
-            switchCategory(newState, action.category, action.payload, (source: CouponModel[], couponsDownloaded: CouponModel[]) => {
-                return couponsDownloaded;
-            });
+            switchCategory(newState, action.category, (source: CouponSet, couponsDownloaded: CouponModel[]) => {
+                source.numOfPages = action.numOfPages;
+                source.totalElements = action.totalElements;
+                source.coupons = source.coupons.concat(couponsDownloaded);
+                return source;
+            }, action.payload);
             break;
         case CouponsActionType.CouponUpdated:
-            const categoryU = (action.payload as CouponModel).category
-            switchCategory(newState, categoryU, action.payload, (source: CouponModel[], couponUpdated: CouponModel[]) => {
-                const index = source.indexOf(couponUpdated[0]);
-                source.splice(index, 1, couponUpdated[0]);
+            const categoryU = action.category;
+            switchCategory(newState, categoryU, (source: CouponSet, couponUpdated: CouponModel[]) => {
+                source.coupons = source.coupons.filter(coupon => coupon.id !== couponUpdated[0].id);
+                source.coupons.push(couponUpdated[0]);
                 return source;
-            });
-            switchCategory(newState, undefined, action.payload, (source: CouponModel[], couponUpdated: CouponModel[]) => {
-                const index = source.indexOf(couponUpdated[0]);
-                source.splice(index, 1, couponUpdated[0]);
+            }, [action.payload]);
+            break;
+        case CouponsActionType.CouponDeleted:
+            const categoryD = action.category;
+            switchCategory(newState, categoryD, (source: CouponSet, couponDeleted: CouponModel[]) => {
+                source.coupons = source.coupons.filter(coupon => coupon.id !== couponDeleted[0].id);
+                source.totalElements--;
+                return source;
+            }, [action.payload]);
+            break;
+        case CouponsActionType.CompanyCouponsDeleted:
+            const categoryC = action.category;
+            switchCategory(newState, categoryC, (source: CouponSet) => {
+                let counter = 0;
+                source.coupons.forEach((coupon) => coupon.company.id === action.payload ? counter++ : null);
+                source.coupons = source.coupons.filter(coupon => coupon.company.id !== action.payload);
+                source.totalElements = source.totalElements - counter;
                 return source;
             });
             break;
-        case CouponsActionType.CouponDeleted:
-            const categoryD = (action.payload as CouponModel).category
-            switchCategory(newState, categoryD, action.payload, (source: CouponModel[], couponDeleted: CouponModel[]) => {
-                const index = source.indexOf(couponDeleted[0]);
-                source.splice(index, 1);
+        case CouponsActionType.CouponPurchased:
+            const categoryP = action.category;
+            if (!(action.payload as CouponModel).customers && action.category === "All") {
+                (action.payload as CouponModel).customers = [];
+            }
+            (action.payload as CouponModel).customers.push(action.customer);
+            switchCategory(newState, categoryP, (source: CouponSet, couponPurchased: CouponModel[]) => {
+                source.coupons = source.coupons.filter(coupon => coupon.id !== couponPurchased[0].id);
+                source.coupons.push(couponPurchased[0]);
                 return source;
-            });
-            switchCategory(newState, undefined, action.payload, (source: CouponModel[], couponDeleted: CouponModel[]) => {
-                const index = source.indexOf(couponDeleted[0]);
-                source.splice(index, 1);
-                return source;
-            });
+            }, [action.payload]);
             break;
     }
     return newState;
-   
+
 }
 
-function switchCategory(state: CouponsState, category: string, target: CouponModel[], fun: (source: CouponModel[], target: CouponModel[]) => CouponModel[]): void{
-    switch(category){
+function switchCategory(state: CouponsState, category: string, fun: (source: CouponSet, target?: CouponModel[]) => CouponSet, target?: CouponModel[]): void {
+    switch (category) {
         case "Electricity":
-            state.coupons.Electricity = fun(state.coupons.Electricity, target);
+            state.category.Electricity = fun(state.category.Electricity, target);
             break;
         case "Spa":
-            state.coupons.Spa = fun(state.coupons.Spa, target);
+            state.category.Spa = fun(state.category.Spa, target);
             break;
         case "Restaurant":
-            state.coupons.Restaurant = fun(state.coupons.Restaurant, target);
+            state.category.Restaurant = fun(state.category.Restaurant, target);
             break;
         case "Vacation":
-            state.coupons.Vacation = fun(state.coupons.Vacation, target);
+            state.category.Vacation = fun(state.category.Vacation, target);
             break;
         case "Attractions":
-            state.coupons.Attractions = fun(state.coupons.Attractions, target);
+            state.category.Attractions = fun(state.category.Attractions, target);
             break;
         case "Furniture":
-            state.coupons.Furniture = fun(state.coupons.Furniture, target);
+            state.category.Furniture = fun(state.category.Furniture, target);
             break;
-        case "":
-            state.coupons.All = fun(state.coupons.All, target);
+        case "Sport":
+            state.category.Sport = fun(state.category.Sport, target);
+            break;
+        case "All":
+            state.category.All = fun(state.category.All, target);
             break;
     }
 }

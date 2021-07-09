@@ -17,12 +17,16 @@ import Logo from '../Logo/Logo';
 import SearchAppBar from '../SearchAppBar/SearchAppBar';
 import PersonIcon from '@material-ui/icons/Person';
 import { createStyles, fade, makeStyles, Theme, withStyles } from '@material-ui/core/styles';
-import { Button } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
+import { GridSpacing } from '@material-ui/core/Grid';
 import { LeakRemoveTwoTone } from '@material-ui/icons';
 import { Unsubscribe } from 'redux';
 import store from '../../../Redux/Stores';
 import CustomerModel from '../../../Models/CustomerModel';
 import CompanyModel from '../../../Models/CompanyModel';
+import AdminMenu from '../../AdminArea/AdminMenu/AdminMenu';
+import { getNewToken } from '../../../Redux/AuthState';
+import "./HideAppBar.css";
 
 interface Props {
   window?: () => Window;
@@ -42,27 +46,47 @@ function HideOnScroll(props: Props) {
 
 export default function HideAppBar(props: Props) {
 
-  //let unsubscriteMe: Unsubscribe;
+  let unsubscribeMe: Unsubscribe;
+  let interval = 0;
+  let isLogin = false;
+  const checkExpiration = 1000 * 60 * 59 * 10;
 
   const [user, setUser] = React.useState(null);
+  const [clientType, setClientType] = React.useState(null);
 
-  useEffect(()=>{
-    //unsubscriteMe = 
-    store.subscribe(() => {
-      setUser(store.getState().AuthState.user);
+  useEffect(() => {
+    setUser(store.getState().AuthState.user);
+    setClientType(store.getState().AuthState.clientType);
+    unsubscribeMe = store.subscribe(() => {
+      if (!isLogin && store.getState().AuthState.user) {
+        isLogin = true;
+        setUser(store.getState().AuthState.user);
+        setClientType(store.getState().AuthState.clientType);
+        interval = window.setInterval(() => {
+          getNewToken(store.getState().AuthState.user, store.getState().AuthState.clientType);
+        }, checkExpiration)
+      } else if (isLogin && !store.getState().AuthState.user) {
+        isLogin = false;
+        clearInterval(interval);
+        setUser(null);
+        setClientType(null);
+      }
     });
+
+    return () => {
+      clearInterval(interval);
+      unsubscribeMe();
+    }
   }, [])
 
 
   const StyledButton = withStyles({
     root: {
-      //background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
       borderRadius: 30,
       border: 0,
       color: 'white',
       height: 38,
       padding: '0 10px',
-      // boxShadow: '0 3px 5px 2px rgba(255, 255, 255, 255)',
     },
     label: {
       textTransform: 'capitalize',
@@ -74,58 +98,85 @@ export default function HideAppBar(props: Props) {
       <React.Fragment>
         <CssBaseline />
         <HideOnScroll {...props}>
-          <AppBar>
+          <AppBar className="appBar">
             <Toolbar>
-              <header>
-                  {props.children}
-              </header>
-              <NavLink to= {"/home"}> 
-                <Logo/>
-              </NavLink>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <Menu/>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <SearchAppBar/>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              {user ? 
-                <>
-                  <span>Hello,</span>&nbsp;
-                  <span>{(user as CustomerModel).firstName || (user as CompanyModel).name || "Admin"}</span>
-                  <NavLink to={"/logout"}>
-                    <StyledButton startIcon={<PersonIcon/>}>logout</StyledButton>
-                  </NavLink>
-                </>
-                :
-                <>
-                  <NavLink to={"/login"}>
-                    <StyledButton startIcon={<PersonIcon/>}>login</StyledButton> 
-                  </NavLink>
-                  | 
+              <Grid container justify="space-between" direction="row" alignItems="center" spacing={(3 as GridSpacing)}>
+                <Grid item>
+                  <header>
+                    <NavLink to={"/home"}>
+                      {props.children}
+                    </NavLink>
+                  </header>
+                </Grid>
+                <Grid item>
+                  <Menu />
+                </Grid>
+                <Grid item>
+                  {clientType === "Company" ?
+                    <NavLink to={"/company/coupons"}>
+                      <StyledButton>My Coupons</StyledButton>
+                    </NavLink>
+                    : clientType === "Customer" ?
+                      <NavLink to={"/customer/coupons"}>
+                        <StyledButton>My Coupons</StyledButton>
+                      </NavLink>
+                      : clientType === "Administrator" ?
+                        <AdminMenu />
+                        : null
+                  }
+                </Grid>
+                <Grid item></Grid><Grid item></Grid>
+                <Grid item></Grid><Grid item></Grid>
+                <Grid item></Grid><Grid item></Grid>
+                <Grid item></Grid><Grid item></Grid>
+                <Grid item></Grid><Grid item></Grid>
+                <Grid item></Grid><Grid item></Grid>
+                <Grid item></Grid><Grid item></Grid>
+                <Grid item></Grid><Grid item></Grid>
+                <Grid item></Grid><Grid item></Grid>
+                <Grid item></Grid><Grid item></Grid>
+                <Grid item></Grid><Grid item></Grid>
+                <Grid item></Grid><Grid item></Grid>
+
+                {user ?
+                  <>
+                    <Grid item>
+                      <span>Hello,&nbsp;{(user as CustomerModel).firstName || (user as CompanyModel).name || "Admin"}</span>
+                    </Grid>
+                    <Grid item>
+                      <NavLink to={"/logout"}>
+                        <StyledButton startIcon={<PersonIcon />}>logout</StyledButton>
+                      </NavLink>
+                    </Grid>
+                  </>
+
+                  :
+
+                  <Grid item>
+                    <NavLink to={"/login"}>
+                      <StyledButton startIcon={<PersonIcon />}>login</StyledButton>
+                    </NavLink>
+                  |
                   <NavLink to={"/register"}>
-                    <StyledButton>register</StyledButton>
-                  </NavLink>
-                </>
-              }
+                      <StyledButton>register</StyledButton>
+                    </NavLink>
+                  </Grid>
+
+
+                }
+              </Grid>
             </Toolbar>
           </AppBar>
         </HideOnScroll>
         <Toolbar id="back-to-top-anchor" />
         <Container>
           <Box my={2}>
-              <main>
-                  <Routing/>
-              </main>
+            <main>
+              <Routing />
+            </main>
           </Box>
         </Container>
-        <BackToTop  {...props}/>
-        <footer>
-              <Footer/>
-        </footer>
+        <BackToTop  {...props} />
       </React.Fragment>
     </BrowserRouter>
   );

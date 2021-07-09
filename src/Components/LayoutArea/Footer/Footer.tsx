@@ -3,7 +3,7 @@ import "./Footer.css";
 function Footer(): JSX.Element {
     return (
         <div className="Footer">
-			footer
+            <p>All right reserved to Lidor Lahav &copy;</p>
         </div>
     );
 }

@@ -1,3 +1,4 @@
 .Layout {
+    display: grid;
+    grid-template-rows: 95% 5%;
 }
-

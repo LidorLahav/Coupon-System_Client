@@ -1,9 +1,7 @@
-
-//global settings which are same for developmnt and production
 class Globals {
 
 }
-//global settings which are suitable only for development 
+
 class DevelopmentGlobals extends Globals {
     public urls = {
         admin: {
@@ -29,15 +27,17 @@ class DevelopmentGlobals extends Globals {
         },
         auth: {
             register: "http://localhost:8080/Auth/register/",
-            login: "http://localhost:8080/Auth/login/"
+            login: "http://localhost:8080/Auth/login/",
+            token: "http://localhost:8080/Auth/token/"
         },
-        images: "http://localhost:8080/App/coupons/images/",
-        coupons: "http://localhost:8080/App/coupons/"
+        images: "http://localhost:8080/pics/",
+        coupons: "http://localhost:8080/App/coupons/",
+        coupon: "http://localhost:8080/App/coupons/one/"
     };
 
 }
-//global setting which are suitable only for production 
-class productionGlobal extends Globals{
+
+class productionGlobal extends Globals {
     public urls = {
         admin: {
             shutDown: "http://localhost:8080/api/Admin/shutdown/",
@@ -62,10 +62,13 @@ class productionGlobal extends Globals{
         },
         auth: {
             register: "http://localhost:8080/Auth/register/",
-            login: "http://localhost:8080/Auth/login/"
+            login: "http://localhost:8080/Auth/login/",
+            token: "http://localhost:8080/Auth/token/"
+
         },
-        images: "http://localhost:8080/App/coupons/images/",
-        coupons: "http://localhost:8080/App/coupons/"
+        images: "http://localhost:8080/pics/",
+        coupons: "http://localhost:8080/App/coupons/",
+        coupon: "http://localhost:8080/App/coupons/one/"
     };
 }
 const globals = process.env.NODE_ENV === "development" ? new DevelopmentGlobals() : new productionGlobal();
