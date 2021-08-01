@@ -11,9 +11,9 @@ function Layout(): JSX.Element {
                 <div className="bar">
                     <HideAppBar children={<Header />} />
                 </div>
-                <footer>
+                {/* <footer>
                     <Footer />
-                </footer>
+                </footer> */}
             </div>
         </BrowserRouter>
     );
