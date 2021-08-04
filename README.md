@@ -1,4 +1,4 @@
-# Coupon-System_Server
+# Coupon-System_Client
 
 ## Link
 > [Lucky-Coupons](https://lucky-coupons.herokuapp.com)
